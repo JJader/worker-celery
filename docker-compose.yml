@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.13.5-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=mydatabase
+    ports:
+      - "5432:5432"
+
+  pgadmin-docker:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "vanderloureiroleite@gmail.com"
+      PGADMIN_DEFAULT_PASSWORD: "root"
+    ports:
+      - 8080:80
+    network_mode: "host"
