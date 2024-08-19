@@ -14,6 +14,12 @@ services:
       - POSTGRES_DB=mydatabase
     ports:
       - "5432:5432"
+  mlflow:
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    ports:
+      - "5000:5000"
   celery:
     build:
       context: .
@@ -21,10 +27,11 @@ services:
     environment:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
     depends_on:
       - rabbitmq
       - db
-
+      - mlflow
   pgadmin-docker:
     image: dpage/pgadmin4
     environment:
