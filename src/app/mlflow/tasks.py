@@ -3,7 +3,9 @@ import joblib
 import io
 import mlflow
 import importlib
-import os
+from entites.model_registry import MlflowRegistry
+import pandas as pd
+
 
 @shared_task(
     bind=True,
@@ -34,5 +36,10 @@ def load(self, model_name: str, backend: str, data):
 @shared_task(
     bind=True,
 )
-def predict(self, data=""):
-    return f"ola mundo {data}"
+def predict(self, model_name: str, data: dict = {}):
+
+    model = MlflowRegistry(model_name)
+    df_input = pd.DataFrame([data])
+    result = model.predict(df_input)
+
+    return result.tolist()
