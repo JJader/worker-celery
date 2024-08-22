@@ -1,3 +1,3 @@
-from entites.model_registry.mlflow_registry import MlflowRegistry
+from entites.model_registry.mlflow_registry import PredictTask, MlflowRegistry
 
-__all__ = ["MlflowRegistry"]
+__all__ = ["MlflowRegistry", "PredictTask"]

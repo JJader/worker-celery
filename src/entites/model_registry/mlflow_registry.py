@@ -1,6 +1,8 @@
 import mlflow
 from mlflow.pyfunc import PyFuncModel
 from entites.model_registry.base import ModelRegistry
+from celery import Task
+import importlib
 
 
 class MlflowRegistry(ModelRegistry):
@@ -9,6 +11,27 @@ class MlflowRegistry(ModelRegistry):
         self.experiment_id: str = self._get_experiment_id(model_name)
         self.run_id: str = None
         self.model: PyFuncModel = None
+
+    @staticmethod
+    def load(model_name: str, backend: str, model):
+
+        flavor = importlib.import_module("." + backend, "mlflow")
+
+        mlflow.set_experiment(model_name)
+
+        with mlflow.start_run() as run:
+            flavor.log_model(model, "model")
+
+        info = run.info
+
+        metadata = {
+            "run_id": info.run_id,
+            "artifact_uri": info.artifact_uri,
+            "run_name": info.run_name,
+            "experiment_id": info.experiment_id,
+        }
+
+        return metadata
 
     def _get_experiment_id(self, model_name: str):
         experiment = dict(mlflow.get_experiment_by_name(model_name))
@@ -36,3 +59,30 @@ class MlflowRegistry(ModelRegistry):
             self._update_model_run_id(latest_run_id)
 
         return self.model.predict(input)
+
+
+class PredictTask(Task):
+    """
+    Abstraction of Celery's Task class to support loading ML model.
+    """
+
+    abstract = True
+
+    def __init__(self):
+        super().__init__()
+        self.model = None
+        self.model_name = None
+
+    def __call__(self, *args, **kwargs):
+        """
+        Load model on first call (i.e. first task processed)
+        Avoids the need to load model on each task request
+        """
+        latest_model_name = kwargs["model_name"]
+        if not self.model or self.model_name != latest_model_name:
+            self.model_name = latest_model_name
+            self.model = MlflowRegistry(latest_model_name)
+
+        print(args)
+        print(kwargs)
+        return self.run(*args, **kwargs)
