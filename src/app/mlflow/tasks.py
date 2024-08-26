@@ -26,4 +26,9 @@ def predict(self, model_name: str, data: dict = {}):
     df_input = pd.DataFrame([data])
     result = self.model.predict(df_input)
 
-    return result.tolist()
+    data = {
+        "result": result.tolist(),
+        "model": self.model.model.metadata.__dict__,
+    }
+
+    return data

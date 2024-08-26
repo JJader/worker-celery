@@ -47,7 +47,7 @@ class MlflowRegistry(ModelRegistry):
 
     def _update_model_run_id(self, run_id):
 
-        self._run_id = run_id
+        self.run_id = run_id
         logged_model = f"runs:/{run_id}/model"
         self.model = mlflow.pyfunc.load_model(logged_model)
 
@@ -70,8 +70,8 @@ class PredictTask(Task):
 
     def __init__(self):
         super().__init__()
-        self.model = None
-        self.model_name = None
+        self.model: MlflowRegistry = None
+        self.model_name: str = None
 
     def __call__(self, *args, **kwargs):
         """
