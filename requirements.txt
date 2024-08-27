@@ -1,0 +1,6 @@
+celery~=5.4.0
+sqlalchemy~=2.0.32
+psycopg2-binary~=2.9.9
+mlflow~=2.15.1
+joblib~=1.4.2
+

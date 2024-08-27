@@ -1,0 +1,45 @@
+version: '3.5'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.13.5-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - proxynet
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=mydatabase
+    ports:
+      - "5432:5432"
+    networks:
+      - proxynet
+  mlflow:
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    ports:
+      - "5000:5000"
+    networks:
+      - proxynet
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    depends_on:
+      - rabbitmq
+      - db
+      - mlflow
+    networks:
+      - proxynet
+networks:
+  proxynet:
+    name: custom_network
