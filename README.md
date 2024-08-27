@@ -41,7 +41,9 @@ Worker para suportar os modelos de ML
 
 [x] reame.md celery
 
-[] teste unitario
+[x] teste unitario api
+
+[x] teste unitario worker
 
 [] docstring
 
